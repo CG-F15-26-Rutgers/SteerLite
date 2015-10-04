@@ -184,7 +184,7 @@ Point Curve::useHermiteCurve(const unsigned int nextPoint, const float time)
 	float f1 = ((2 * pow(t, 3)) - (3 * pow(t, 2)) + 1);
 	float f2 = ((-2 * pow(t, 3)) + (3 * pow(t, 2)));
 	float f3 = ((pow(t, 3)) - (2 * pow(t, 2)) + t);
-	float f4 = ((pow(t, 4)) - (pow(t, 2)));
+	float f4 = ((pow(t, 3)) - (pow(t, 2)));
 
 	newPosition = (p1 * f1) + (p2 * f2) + (r1 * f3 * intervalTime) + (r2 * f4 * intervalTime);
 
