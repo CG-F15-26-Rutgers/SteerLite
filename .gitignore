@@ -1,2 +1,44 @@
+<<<<<<< HEAD
 *.opensdf
 
+=======
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Release or Debug folders
+**/[rR]elease/
+**/[dD]ebug/
+**/.vs/
+**/x64/
+**/x86/
+
+# SDF files
+**/*.opensdf
+**/*.sdf
+>>>>>>> b8e2593258a82860467d963efe8af3dae1014816

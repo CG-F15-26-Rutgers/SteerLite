@@ -74,6 +74,7 @@ void Curve::sortControlPoints()
 	//Selection Sort
 	for (int i = 0; i < controlPoints.size() - 1; i++)
 	{
+<<<<<<< HEAD
 		//Yo guys!!
 		float yyyo = i;
 		int j;
@@ -90,6 +91,10 @@ void Curve::sortControlPoints()
 			controlPoints[i].time = controlPoints[j].time;
 			controlPoints[j].time = temp;
 		}
+=======
+		//std::cerr << "ERROR>>>>Member function sortControlPoints is not implemented!" << std::endl;
+		flag = true;
+>>>>>>> b8e2593258a82860467d963efe8af3dae1014816
 	}
 	return;
 }
