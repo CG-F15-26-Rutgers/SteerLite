@@ -74,7 +74,6 @@ void Curve::sortControlPoints()
 	//Selection Sort
 	for (int i = 0; i < controlPoints.size() - 1; i++)
 	{
-<<<<<<< HEAD
 		//Yo guys!!
 		float yyyo = i;
 		int j;
@@ -91,10 +90,6 @@ void Curve::sortControlPoints()
 			controlPoints[i].time = controlPoints[j].time;
 			controlPoints[j].time = temp;
 		}
-=======
-		//std::cerr << "ERROR>>>>Member function sortControlPoints is not implemented!" << std::endl;
-		flag = true;
->>>>>>> b8e2593258a82860467d963efe8af3dae1014816
 	}
 	return;
 }
@@ -189,7 +184,7 @@ Point Curve::useHermiteCurve(const unsigned int nextPoint, const float time)
 	float f1 = ((2 * pow(t, 3)) - (3 * pow(t, 2)) + 1);
 	float f2 = ((-2 * pow(t, 3)) + (3 * pow(t, 2)));
 	float f3 = ((pow(t, 3)) - (2 * pow(t, 2)) + t);
-	float f4 = ((pow(t, 3)) - (pow(t, 2)));
+	float f4 = ((pow(t, 4)) - (pow(t, 2)));
 
 	newPosition = (p1 * f1) + (p2 * f2) + (r1 * f3 * intervalTime) + (r2 * f4 * intervalTime);
 
@@ -258,6 +253,6 @@ Point Curve::useCatmullCurve(const unsigned int nextPoint, const float time)
 	newPosition.y = 0.5 * ((3 * P1.y - 3 * P2.y + P3.y - P0.y)*tCubed + (2 * P0.y - 5 * P1.y + 4 * P2.y - P3.y)*tSquared + (P2.y - P0.y)*normalTime + 2 * P1.y);
 	newPosition.z = 0.5 * ((3 * P1.z - 3 * P2.z + P3.z - P0.z)*tCubed + (2 * P0.z - 5 * P1.x + 4 * P2.z - P3.z)*tSquared + (P2.z - P0.z)*normalTime + 2 * P1.z);
 	*/
-	
+
 	return newPosition;
 }
