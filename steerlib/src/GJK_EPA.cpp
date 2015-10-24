@@ -100,16 +100,28 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
 	/*
 		INITIAL SETUP
 	*/
-	Util::Vector centerA = CreamyCenter(_shapeA);
-	Util::Vector centerB = CreamyCenter(_shapeB);
+	Util::Vector centerA;
+	Util::Vector centerB;
+
+	if(!_shapeA.empty())
+		centerA = CreamyCenter(_shapeA);
+	if(!_shapeB.empty())
+		centerB = CreamyCenter(_shapeB);
+	
 	Util::Vector direction = centerB - centerA;
 	Util::Vector minkdiff = support(_shapeA, _shapeB, direction);
+	//printf("Minkowski 1: <%f, %f, %f>\n", minkdiff.x, minkdiff.y, minkdiff.z);
 
-	printf("Minkowski: <%f, %f, %f>\n", minkdiff.x, minkdiff.y, minkdiff.z);
+	//add minkdiff to simplex
 
-	//printf("Creamy Center A: <%f, %f, %f>\n", centerA.x, centerA.y, centerA.z);
-	//printf("Creamy Center B: <%f, %f, %f>", centerB.x, centerB.y, centerB.z);	
-	//printf("Direction: <%f, %f, %f>\n", direction.x, direction.y, direction.z);
+	//minkdiff = support(_shapeA, _shapeB, -direction);
+	//printf("Minkowski 2: <%f, %f, %f>\n", minkdiff.x, minkdiff.y, minkdiff.z);
+
+
+	printf("Creamy Center A: <%f, %f, %f>\n", centerA.x, centerA.y, centerA.z);
+	printf("Creamy Center B: <%f, %f, %f>", centerB.x, centerB.y, centerB.z);	
+	printf("Direction: <%f, %f, %f>\n", direction.x, direction.y, direction.z);
+	//printf("Minkowski: <%f, %f, %f>\n", minkdiff.x, minkdiff.y, minkdiff.z);
 	return false;
 }
 
