@@ -106,11 +106,11 @@ Util::Vector DoubleCrosser(Util::Vector AB, Util::Vector A0)
 	return ABxA0xAB;
 }
 
-bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector d)
+bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 {
 	// Set up
 	Util::Vector A, B, C, AB, AC, A0, ABPerp, ACPerp;
-	float dotproduct;
+	float ABDot, ACDot;
 	Util::Vector ORIGIN(0, 0, 0);
 	A = _simplex[2];
 	B = _simplex[1];
@@ -123,6 +123,7 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector d)
 	printf("AB: <%f, %f, %f>\nAC: <%f, %f, %f>\n", AB.x, AB.y, AB.z, AC.x, AC.y, AC.z);
 
 	// (AC x AB) x AB = AB(AB dot AC) - AC(AB dot AB)
+	// Normal
 	// Need to move to separate function
 	float ABdotAC = (AB.x * AC.x) + (AB.y * AC.y) + (AB.z * AC.z);
 	float ABdotAB = (AB.x * AB.x) + (AB.y * AB.y) + (AB.z * AB.z);
@@ -132,10 +133,10 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector d)
 	printf("ABPerp: <%f, %f, %f>\n", ABPerp.x, ABPerp.y, ABPerp.z);
 
 	// Check ABPerp dot product
-	dotproduct = (ABPerp.x * A0.x) + (ABPerp.y * A0.y) + (ABPerp.z * A0.z);
-	printf("dotproduct: %f\n", dotproduct);
+	ABDot = (ABPerp.x * A0.x) + (ABPerp.y * A0.y) + (ABPerp.z * A0.z);
 
 	// (AB x AC) x AC = AC(AC dot AB) - AB(AC dot AC)
+	// Normal
 	float ACdotAB = (AC.x * AB.x) + (AC.y * AB.y) + (AC.z * AB.z);
 	float ACdotAC = (AC.x * AC.x) + (AC.y * AC.y) + (AC.z * AC.z);
 	ACPerp.x = (AC.x * ACdotAB) - (AB.x * ACdotAC);
@@ -144,8 +145,28 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector d)
 	printf("ACPerp: <%f, %f, %f>\n", ACPerp.x, ACPerp.y, ACPerp.z);
 
 	// Check ACPerp dot product
-	dotproduct = (ACPerp.x * A0.x) + (ACPerp.y * A0.y) + (ACPerp.z * A0.z);
-	printf("dotproduct: %f\n", dotproduct);
+	ACDot = (ACPerp.x * A0.x) + (ACPerp.y * A0.y) + (ACPerp.z * A0.z);
+
+	if (ABDot > 0) {
+		_simplex.erase(_simplex.begin() + 2);
+
+		d = ABPerp;
+
+		return false;
+	}
+	else {
+		if (ACDot > 0) {
+			_simplex.erase(_simplex.begin() + 1);
+
+			d = ACPerp;
+
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
 
 	return false;
 }
@@ -193,22 +214,27 @@ bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vect
 	printf("AB: <%f, %f, %f>\nA0: <%f, %f, %f>\n", AB.x, AB.y, AB.z, A0.x, A0.y, A0.z);
 	printf("d: <%f, %f, %f>\n", d.x, d.y, d.z);
 
-	// Get next point for simplex
-	newPoint = support(_shapeA, _shapeB, d);
-	printf("newPoint: <%f, %f, %f>\n", newPoint.x, newPoint.y, newPoint.z);
+	while (true) {
+		// Get next point for simplex
+		newPoint = support(_shapeA, _shapeB, d);
+		printf("newPoint: <%f, %f, %f>\n", newPoint.x, newPoint.y, newPoint.z);
 
-	// Test simplex dot product
-	dotproduct = (newPoint.x * d.x) + (newPoint.y * d.y) + (newPoint.z * d.z);
-	printf("dotproduct: %f\n", dotproduct);
+		// Test simplex dot product
+		dotproduct = (newPoint.x * d.x) + (newPoint.y * d.y) + (newPoint.z * d.z);
+		printf("dotproduct: %f\n", dotproduct);
 
-	// Add newPoint to simplex
-	_simplex.push_back(newPoint);
+		if (dotproduct < 0)
+			return false;
 
-	return CheckOrigin(_simplex, d);
+		// Add newPoint to simplex
+		_simplex.push_back(newPoint);
 
+		if (CheckOrigin(_simplex, d))
+			return true;
+	}
 
 	// "Makes the compiler happy" - Sesh Venugopal
-	//return false;
+	return false;
 }
 
 
@@ -216,7 +242,8 @@ bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vect
 bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
 	std::vector<Util::Vector> _simplex;
-	GJK(_simplex, _shapeA, _shapeB);
+	if (GJK(_simplex, _shapeA, _shapeB))
+		return true;
 
 	 /*
 	 * REHASH OF WHAT'S IN THE HEADER FILE 

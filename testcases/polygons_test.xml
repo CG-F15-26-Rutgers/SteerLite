@@ -20,7 +20,6 @@
     </worldBounds>
   </header>
 
- <!--
   <polygonObstacle isClosed="true">
 	<vertex> <x>0</x> <y>0.0</y> <z>-2.0</z> </vertex>
 	<vertex> <x>1.0</x> <y>0.0</y> <z>0.0</z> </vertex>
@@ -37,7 +36,8 @@
 	<vertex> <x>2.0</x> <y>0.0</y> <z>-2.0</z> </vertex>
 	<vertex> <x>-1.0</x> <y>0.0</y> <z>-2.0</z> </vertex>
  </polygonObstacle>
--->
+
+  <!--
 
 
  <polygonObstacle isClosed="true">
@@ -54,7 +54,7 @@
 	<vertex> <x>4.0</x> <y>0.0</y> <z>5.0</z> </vertex>
   </polygonObstacle>
 
-
+-->
 
   
   
