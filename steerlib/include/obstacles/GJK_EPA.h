@@ -130,11 +130,11 @@ namespace SteerLib
             static bool intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
 
         private:
-			static bool GJK(std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
-			std::pair<float, Util::Vector> EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
+			static bool GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
+			static void EPA(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
 			//std::vector<Util::Vector> closestEdge(std::vector<Util::Vector> _simplex);
-			std::vector<Util::Vector> tripleProduct(Util::Vector firstVector, Util::Vector secondVector, Util::Vector thirdVector);
-			float DotProduct(Util::Vector u, Util::Vector v);
+			//std::vector<Util::Vector> tripleProduct(Util::Vector firstVector, Util::Vector secondVector, Util::Vector thirdVector);
+			static float DotProduct(Util::Vector u, Util::Vector v);
 			std::vector<Util::Vector> normal(std::vector<Util::Vector> theVector);
 
     }; // class GJK_EPA

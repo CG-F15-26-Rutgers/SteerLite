@@ -177,9 +177,10 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 	return false;
 }
 
-bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
 	// Init some variables
+	std::vector<Util::Vector> _simplex;
 	Util::Vector centerA, centerB, direction, d, A, B, AB, A0, newPoint;
 	Util::Vector ORIGIN(0, 0, 0);
 	float dotproduct;
@@ -289,11 +290,11 @@ Edge findClosestEdge(std::vector<Util::Vector> polygon){
 }
 
 
-std::pair<float, Util::Vector> SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+void SteerLib::GJK_EPA::EPA(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
 
 	Util::Vector normal;	
-	Edge closestEdge; //it's asking for a ';' but this is legal???
+	Edge closestEdge;
 	float depth;
 	
 	float epsilon = 0.0001; // Should be a small number.
@@ -307,13 +308,34 @@ std::pair<float, Util::Vector> SteerLib::GJK_EPA::EPA(const std::vector<Util::Ve
 
 		if (d - closestEdge.distance < epsilon)
 		{
-			normal = closestEdge.normal;
-			depth = d;
-			return std::make_pair(depth, normal);
+			return_penetration_vector = closestEdge.normal;
+			return_penetration_depth = d;
 		}
 
 		else
-			_simplex.insert(closestEdge.index, supportVector);
+			_simplex.assign(_simplex.begin() + closestEdge.index, supportVector);
 	}
 
 }
+
+bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+{
+	std::vector<Util::Vector> _simplex;
+	float penDepth;
+	bool colliding; 
+	Util::Vector penVector;
+
+	(_simplex, colliding) = GJK(_shapeA, _shapeB);
+	if (colliding)
+	{
+		EPA(return_penetration_depth, return_penetration_vector, _simplex, _shapeA, _shapeB);
+		return true;
+	}
+	else
+	{
+		penDepth = 0;
+		penVector.zero();
+		return false;
+	}
+}
+
