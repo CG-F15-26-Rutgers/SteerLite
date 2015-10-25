@@ -10,7 +10,7 @@
 typedef struct Edge{
 	float distance;
 	Util::Vector normal;
-	unsignedint index;
+	unsigned int index;
 }Edge;
 
 
