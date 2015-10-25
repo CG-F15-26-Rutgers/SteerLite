@@ -13,19 +13,8 @@ SteerLib::GJK_EPA::GJK_EPA()
 }
 
 /*
-Util::Vector SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Vector& d)
-{
-	// get farthest points for _shapeA and _shapeB
-	Util::Vector pointA = getFarthestPoint(_shapeA, d);
-	Util::Vector pointB = getFarthestPoint(_shapeB, -d);
-
-	// get Minkwoski difference
-	Util::Vector minkDiff = pointA - pointB;
-
-	return minkDiff;
-}
+	Gets naive center of a shape
 */
-
 Util::Vector CreamyCenter(const std::vector<Util::Vector>& _shape)
 {
 	Util::Vector center(0, 0, 0);
@@ -47,6 +36,9 @@ Util::Vector CreamyCenter(const std::vector<Util::Vector>& _shape)
 	return center;
 }
 
+/*
+	Gets the farthest point based on a direction
+*/
 Util::Vector getFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vector direction)
 {
 	// it didn't like it when i did maxdot = 0
@@ -67,11 +59,14 @@ Util::Vector getFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vec
 	return farthest;
 }
 
+/*
+	_shapeA --> get farthest point in direction
+	-shapeB --> get farthest point in -direction
+
+	Minkowski difference = farthestA - farthestB 
+*/
 Util::Vector support(const std::vector <Util::Vector>& _shapeA, const std::vector <Util::Vector>& _shapeB, Util::Vector direction)
 {
-	// _shapeA --> Get farthest point in direction
-	// _shapeB --> Get farthest point in -direction
-
 	Util::Vector farthestA = getFarthestPoint(_shapeA, direction);
 	Util::Vector farthestB = getFarthestPoint(_shapeB, -(direction));
 
@@ -92,13 +87,17 @@ void PrintPoints(const std::vector<Util::Vector>& _shapeA, const std::vector<Uti
 	}
 }
 
+/*
+	(A x B) x C = B(C dot A) - A(C dot B)
+	(AB x A0) x AB = A0(AB dot AB) - AB(AB dot A0)
+	lhs = AB dot AB
+	rhs = AB dot A0
+*/
 Util::Vector DoubleCrosser(Util::Vector AB, Util::Vector A0)
 {
-	// (AB x A0) x AB = A0(AB dot AB) - AB(AB dot A0)
-	// lhs = AB dot AB
-	// rhs = AB dot A0
 	float lhs = (AB.x * AB.x) + (AB.y * AB.y) + (AB.z * AB.z);
 	float rhs = (AB.x * A0.x) + (AB.y * A0.y) + (AB.z * A0.z);
+
 	Util::Vector ABxA0xAB;
 	ABxA0xAB.x = (A0.x * lhs) - (AB.x * rhs);
 	ABxA0xAB.y = (A0.y * lhs) - (AB.y * rhs);
@@ -107,41 +106,109 @@ Util::Vector DoubleCrosser(Util::Vector AB, Util::Vector A0)
 	return ABxA0xAB;
 }
 
+bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector d)
+{
+	// Set up
+	Util::Vector A, B, C, AB, AC, A0, ABPerp, ACPerp;
+	float dotproduct;
+	Util::Vector ORIGIN(0, 0, 0);
+	A = _simplex[2];
+	B = _simplex[1];
+	C = _simplex[0];
+	printf("A: <%f, %f, %f>\nB: <%f, %f, %f>\nC: <%f, %f, %f>\n", A.x, A.y, A.z, B.x, B.y, B.z, C.x, C.y, C.z);
+
+	AB = B - A;
+	AC = C - A;
+	A0 = ORIGIN - A;
+	printf("AB: <%f, %f, %f>\nAC: <%f, %f, %f>\n", AB.x, AB.y, AB.z, AC.x, AC.y, AC.z);
+
+	// (AC x AB) x AB = AB(AB dot AC) - AC(AB dot AB)
+	// Need to move to separate function
+	float ABdotAC = (AB.x * AC.x) + (AB.y * AC.y) + (AB.z * AC.z);
+	float ABdotAB = (AB.x * AB.x) + (AB.y * AB.y) + (AB.z * AB.z);
+	ABPerp.x = (AB.x * ABdotAC) - (AC.x * ABdotAB);
+	ABPerp.y = (AB.y * ABdotAC) - (AC.y * ABdotAB);
+	ABPerp.z = (AB.z * ABdotAC) - (AC.z * ABdotAB);
+	printf("ABPerp: <%f, %f, %f>\n", ABPerp.x, ABPerp.y, ABPerp.z);
+
+	// Check ABPerp dot product
+	dotproduct = (ABPerp.x * A0.x) + (ABPerp.y * A0.y) + (ABPerp.z * A0.z);
+	printf("dotproduct: %f\n", dotproduct);
+
+	// (AB x AC) x AC = AC(AC dot AB) - AB(AC dot AC)
+	float ACdotAB = (AC.x * AB.x) + (AC.y * AB.y) + (AC.z * AB.z);
+	float ACdotAC = (AC.x * AC.x) + (AC.y * AC.y) + (AC.z * AC.z);
+	ACPerp.x = (AC.x * ACdotAB) - (AB.x * ACdotAC);
+	ACPerp.y = (AC.y * ACdotAB) - (AB.y * ACdotAC);
+	ACPerp.z = (AC.z * ACdotAB) - (AB.z * ACdotAC);
+	printf("ACPerp: <%f, %f, %f>\n", ACPerp.x, ACPerp.y, ACPerp.z);
+
+	// Check ACPerp dot product
+	dotproduct = (ACPerp.x * A0.x) + (ACPerp.y * A0.y) + (ACPerp.z * A0.z);
+	printf("dotproduct: %f\n", dotproduct);
+
+	return false;
+}
+
 bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
-	//PrintPoints(_shapeA, _shapeB);	
+	// Init some variables
+	Util::Vector centerA, centerB, direction, d, A, B, AB, A0, newPoint;
+	Util::Vector ORIGIN(0, 0, 0);
+	float dotproduct;
 
-	/*
-		INITIAL SETUP
-	*/
-	Util::Vector centerA;
-	Util::Vector centerB;
-
+	// Make sure simplex is clear
+	_simplex.clear();
+	
+	// Check for emptiness then get to the creamy center
 	if(!_shapeA.empty())
 		centerA = CreamyCenter(_shapeA);
 	if(!_shapeB.empty())
 		centerB = CreamyCenter(_shapeB);
 	
-	Util::Vector direction = centerB - centerA;
-	Util::Vector A = support(_shapeA, _shapeB, direction);
-	Util::Vector B = support(_shapeA, _shapeB, -direction);
-	
-	printf("A = <%f, %f, %f>\nB = <%f, %f, %f>\n", A.x, A.y, A.z, B.x, B.y, B.z);
+	PrintPoints(_shapeA, _shapeB);
+	printf("Creamy Center of A: <%f, %f, %f>\n", centerA.x, centerA.y, centerA.z);
+	printf("Creamy Center of B: <%f, %f, %f>\n", centerB.x, centerB.y, centerB.z);
 
-	Util::Vector AB = (B - A);
-	Util::Vector A0 = -A;
-	
+	// Subtract centers to get initial direction
+	direction = centerB - centerA;
+	printf("Direction: <%f, %f, %f>\n", direction.x, direction.y, direction.z);
 
-	//printf("Minkowski 1: <%f, %f, %f>\n", minkdiff.x, minkdiff.y, minkdiff.z);
-	//minkdiff = support(_shapeA, _shapeB, -direction);
-	//printf("Minkowski 2: <%f, %f, %f>\n", minkdiff.x, minkdiff.y, minkdiff.z);
+	// Get first and second points in simplex
+	// Simplex point is found by subtracting the two farthest points from the support function
+	// Use the direction based on centers and negate direction for second point
+	A = support(_shapeA, _shapeB, direction);
+	B = support(_shapeA, _shapeB, -direction);
+	printf("A: <%f, %f, %f>\nB:<%f, %f, %f>\n", A.x, A.y, A.z, B.x, B.y, B.z);
+
+	// Add A and B to simplex
+	_simplex.push_back(A);
+	_simplex.push_back(B);
+
+	// Get new direction
+	// (AB x A0) x AB = A0(AB dot AB) - AB(A0 dot AB)
+	AB = B - A;
+	A0 = ORIGIN - A;
+	d = DoubleCrosser(AB, A0);
+	printf("AB: <%f, %f, %f>\nA0: <%f, %f, %f>\n", AB.x, AB.y, AB.z, A0.x, A0.y, A0.z);
+	printf("d: <%f, %f, %f>\n", d.x, d.y, d.z);
+
+	// Get next point for simplex
+	newPoint = support(_shapeA, _shapeB, d);
+	printf("newPoint: <%f, %f, %f>\n", newPoint.x, newPoint.y, newPoint.z);
+
+	// Test simplex dot product
+	dotproduct = (newPoint.x * d.x) + (newPoint.y * d.y) + (newPoint.z * d.z);
+	printf("dotproduct: %f\n", dotproduct);
+
+	// Add newPoint to simplex
+	_simplex.push_back(newPoint);
+
+	return CheckOrigin(_simplex, d);
 
 
-	//printf("Creamy Center A: <%f, %f, %f>\n", centerA.x, centerA.y, centerA.z);
-	//printf("Creamy Center B: <%f, %f, %f>", centerB.x, centerB.y, centerB.z);	
-	//printf("Direction: <%f, %f, %f>\n", direction.x, direction.y, direction.z);
-	//printf("Minkowski: <%f, %f, %f>\n", minkdiff.x, minkdiff.y, minkdiff.z);
-	return false;
+	// "Makes the compiler happy" - Sesh Venugopal
+	//return false;
 }
 
 
