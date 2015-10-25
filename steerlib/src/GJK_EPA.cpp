@@ -237,6 +237,72 @@ bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vect
 	return false;
 }
 
+void SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+{
+	while (true)
+	{
+		std::vector<Util::Vector> closestEdge = SteerLib::GJK_EPA::closestEdge(_simplex);
+	}
+
+	//more to come bbs
+
+}
+
+std::vector<Util::Vector> SteerLib::GJK_EPA::closestEdge(std::vector<Util::Vector> _simplex)
+{
+	float hugeDistance = 1000000000000;
+	float index = 0;
+	std::vector<Util::Vector> datEdge;
+	datEdge[0] = 100000000000; //red under the equals. Dont get it....
+
+	for (int i = 0; _simplex.size() - 1; i++)
+	{
+		int d = i + 1 == _simplex.size() ? 0 : i + 1;
+		Util::Vector a = _simplex[i];
+		Util::Vector b = _simplex[d];
+
+		Util::Vector edge;
+		for (int s = 0; s < a.length; s++)
+		{
+			edge[s] = a[s] - b[s];
+		}
+
+		std::vector<Util::Vector> product = tripleProduct(edge, a, edge);//actually triple product but im having trouble with this
+		std::vector<Util::Vector> normalV = normal(product);
+
+		float theDot = dotProduct(normalV);
+		if (theDot < datEdge[0]) //red under the compare
+		{
+			datEdge[0] = theDot; // red under equals
+		}
+
+	}
+
+	return datEdge;
+}
+
+std::vector<Util::Vector> SteerLib::GJK_EPA::tripleProduct(Util::Vector firstVector, Util::Vector secondVector, Util::Vector thirdVector)
+{
+	std::vector<Util::Vector> product;
+
+	for (int i = 0; i < firstVector.length; i++)
+	{
+		//uhhhh wrong but im not sure what to do
+		product[i] = (firstVector[i] * secondVector[i]) + (firstVector[i] * secondVector[i]) + (firstVector[i] * secondVector[i]);
+	}
+
+	return product;
+}
+
+float SteerLib::GJK_EPA::dotProduct(std::vector<Util::Vector> vectorYo)
+{
+	float circleCircleDotDot = 0;
+	for (int i = 0; i < vectorYo.size() - 1; i++)
+	{
+		circleCircleDotDot += vectorYo[i]; //not finished
+	}
+}
+
 
 //Look at the GJK_EPA.h header file for documentation and instructions
 bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
