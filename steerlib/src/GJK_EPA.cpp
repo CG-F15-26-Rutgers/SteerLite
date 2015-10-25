@@ -110,14 +110,14 @@ float DotProduct(Util::Vector u, Util::Vector v){
 	return u.x*v.x + u.y*v.y + u.z*v.z;
 }
 
-Util::Vector DoubleCrosser(Util::Vector AB, Util::Vector A0)
+Util::Vector DoubleCrosser(Util::Vector u, Util::Vector v)
 {
-	// Returns (A x B) x C, which is equivalent to B(C dot A) - A(C dot B)
+	// Returns (u x v) x u, which is equivalent to v(u dot u) - u(u dot v)
 	
-	float lhs = DotProduct(AB, AB); 
-	float rhs = DotProduct(AB, A0);
+	float uSquared = DotProduct(u, u); 
+	float uDotv = DotProduct(u, v);
 
-	return A0*lhs - AB*rhs;
+	return v*uSquared - u*uDotv;
 }
 
 bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
@@ -138,7 +138,7 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 
 	// (AC x AB) x AB = AB(AB dot AC) - AC(AB dot AB)
 	// Normal
-	ABPerp = DoubleCrosser(AB, A0);
+	ABPerp = -DoubleCrosser(AB, A0);
 	printf("ABPerp: <%f, %f, %f>\n", ABPerp.x, ABPerp.y, ABPerp.z);
 
 	// Check ABPerp dot product
@@ -146,7 +146,7 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 
 	// (AB x AC) x AC = AC(AC dot AB) - AB(AC dot AC)
 	// Normal
-	ACPerp = DoubleCrosser(AC, AB);
+	ACPerp = -DoubleCrosser(AC, AB);
 	printf("ACPerp: <%f, %f, %f>\n", ACPerp.x, ACPerp.y, ACPerp.z);
 
 	// Check ACPerp dot product
