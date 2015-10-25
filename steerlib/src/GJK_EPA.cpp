@@ -93,23 +93,31 @@ void PrintPoints(const std::vector<Util::Vector>& _shapeA, const std::vector<Uti
 	}
 }
 
-/*
-	(A x B) x C = B(C dot A) - A(C dot B)
-	(AB x A0) x AB = A0(AB dot AB) - AB(AB dot A0)
-	lhs = AB dot AB
-	rhs = AB dot A0
-*/
+Util::Vector CrossProduct(Util::Vector u, Util::Vector v){
+	// Returns the cross product of two vectors u and v.
+	
+	Util::Vector uv;
+	uv.x = u.y*v.z - u.z*v.y;
+	uv.y = u.z*v.x - u.x*v.z;
+	uv.z = u.x*v.y - u.y*v.x;
+	
+	return uv;
+}
+
+float DotProduct(Util::Vector u, Util::Vector v){
+	// Returns the dot product of two vectors u and v.
+	
+	return u.x*v.x + u.y*v.y + u.z*v.z;
+}
+
 Util::Vector DoubleCrosser(Util::Vector AB, Util::Vector A0)
 {
-	float lhs = (AB.x * AB.x) + (AB.y * AB.y) + (AB.z * AB.z);
-	float rhs = (AB.x * A0.x) + (AB.y * A0.y) + (AB.z * A0.z);
+	// Returns (A x B) x C, which is equivalent to B(C dot A) - A(C dot B)
+	
+	float lhs = DotProduct(AB, AB); 
+	float rhs = DotProduct(AB, A0);
 
-	Util::Vector ABxA0xAB;
-	ABxA0xAB.x = (A0.x * lhs) - (AB.x * rhs);
-	ABxA0xAB.y = (A0.y * lhs) - (AB.y * rhs);
-	ABxA0xAB.z = (A0.z * lhs) - (AB.z * rhs);
-
-	return ABxA0xAB;
+	return A0*lhs - AB*rhs;
 }
 
 bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
@@ -117,7 +125,7 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 	// Set up
 	Util::Vector A, B, C, AB, AC, A0, ABPerp, ACPerp;
 	float ABDot, ACDot;
-	Util::Vector ORIGIN(0, 0, 0);
+
 	A = _simplex[2];
 	B = _simplex[1];
 	C = _simplex[0];
@@ -125,33 +133,24 @@ bool CheckOrigin(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 
 	AB = B - A;
 	AC = C - A;
-	A0 = ORIGIN - A;
+	A0 = -A;
 	printf("AB: <%f, %f, %f>\nAC: <%f, %f, %f>\n", AB.x, AB.y, AB.z, AC.x, AC.y, AC.z);
 
 	// (AC x AB) x AB = AB(AB dot AC) - AC(AB dot AB)
 	// Normal
-	// Need to move to separate function
-	float ABdotAC = (AB.x * AC.x) + (AB.y * AC.y) + (AB.z * AC.z);
-	float ABdotAB = (AB.x * AB.x) + (AB.y * AB.y) + (AB.z * AB.z);
-	ABPerp.x = (AB.x * ABdotAC) - (AC.x * ABdotAB);
-	ABPerp.y = (AB.y * ABdotAC) - (AC.y * ABdotAB);
-	ABPerp.z = (AB.z * ABdotAC) - (AC.z * ABdotAB);
+	ABPerp = DoubleCrosser(AB, A0);
 	printf("ABPerp: <%f, %f, %f>\n", ABPerp.x, ABPerp.y, ABPerp.z);
 
 	// Check ABPerp dot product
-	ABDot = (ABPerp.x * A0.x) + (ABPerp.y * A0.y) + (ABPerp.z * A0.z);
+	ABDot = DotProduct(ABPerp, A0);
 
 	// (AB x AC) x AC = AC(AC dot AB) - AB(AC dot AC)
 	// Normal
-	float ACdotAB = (AC.x * AB.x) + (AC.y * AB.y) + (AC.z * AB.z);
-	float ACdotAC = (AC.x * AC.x) + (AC.y * AC.y) + (AC.z * AC.z);
-	ACPerp.x = (AC.x * ACdotAB) - (AB.x * ACdotAC);
-	ACPerp.y = (AC.y * ACdotAB) - (AB.y * ACdotAC);
-	ACPerp.z = (AC.z * ACdotAB) - (AB.z * ACdotAC);
+	ACPerp = DoubleCrosser(AC, AB);
 	printf("ACPerp: <%f, %f, %f>\n", ACPerp.x, ACPerp.y, ACPerp.z);
 
 	// Check ACPerp dot product
-	ACDot = (ACPerp.x * A0.x) + (ACPerp.y * A0.y) + (ACPerp.z * A0.z);
+	ACDot = DotProduct(ACPerp, A0);
 
 	if (ABDot > 0) {
 		_simplex.erase(_simplex.begin() + 2);
@@ -182,7 +181,6 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
 	// Init some variables
 	std::vector<Util::Vector> _simplex;
 	Util::Vector centerA, centerB, direction, d, A, B, AB, A0, newPoint;
-	Util::Vector ORIGIN(0, 0, 0);
 	float dotproduct;
 
 	// Make sure simplex is clear
@@ -216,7 +214,7 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
 	// Get new direction
 	// (AB x A0) x AB = A0(AB dot AB) - AB(A0 dot AB)
 	AB = B - A;
-	A0 = ORIGIN - A;
+	A0 = -A;
 	d = DoubleCrosser(AB, A0);
 	printf("AB: <%f, %f, %f>\nA0: <%f, %f, %f>\n", AB.x, AB.y, AB.z, A0.x, A0.y, A0.z);
 	printf("d: <%f, %f, %f>\n", d.x, d.y, d.z);
@@ -227,7 +225,7 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
 		printf("newPoint: <%f, %f, %f>\n", newPoint.x, newPoint.y, newPoint.z);
 
 		// Test simplex dot product
-		dotproduct = (newPoint.x * d.x) + (newPoint.y * d.y) + (newPoint.z * d.z);
+		dotproduct = DotProduct(newPoint, d);
 		printf("dotproduct: %f\n", dotproduct);
 
 		if (dotproduct < 0)
@@ -244,23 +242,6 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
 	return false;
 }
 
-Util::Vector CrossProduct(Util::Vector u, Util::Vector v){
-	// Returns cross product of the vectors u and v
-	
-	Util::Vector uv;
-	uv.x = u.y*v.z - u.z*v.y;
-	uv.y = u.z*v.x - u.x*v.z;
-	uv.z = u.x*v.y - u.y*v.x;
-	
-	return uv;
-}
-
-float DotProduct(Util::Vector u, Util::Vector v){
-	//Returns the dot product of two vectors u and v.
-	
-	return u.x*v.x + u.y*v.y + u.z*v.z;
-}
-
 Edge findClosestEdge(std::vector<Util::Vector> polygon){
 	// Returns the edge of the polygon which is closest to the origin.
 
@@ -273,7 +254,7 @@ Edge findClosestEdge(std::vector<Util::Vector> polygon){
 		Util::Vector a = polygon[i];
 		Util::Vector b = polygon[j];
 		Util::Vector e = b - a;
-		Util::Vector oa = a; // Think of this as origin - a
+		Util::Vector oa = a; // Think of this as a - origin
 		Util::Vector n = CrossProduct(CrossProduct(e, oa), e);
 		n = Util::normalize(n);
 
@@ -295,7 +276,6 @@ void SteerLib::GJK_EPA::EPA(float& return_penetration_depth, Util::Vector& retur
 
 	Util::Vector normal;	
 	Edge closestEdge;
-	float depth;
 	
 	float epsilon = 0.0001; // Should be a small number.
 	
@@ -325,7 +305,7 @@ bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector&
 	bool colliding; 
 	Util::Vector penVector;
 
-	(_simplex, colliding) = GJK(_shapeA, _shapeB);
+	colliding = GJK(_shapeA, _shapeB);
 	if (colliding)
 	{
 		EPA(return_penetration_depth, return_penetration_vector, _simplex, _shapeA, _shapeB);
