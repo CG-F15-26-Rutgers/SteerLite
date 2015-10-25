@@ -264,7 +264,7 @@ Edge findClosestEdge(std::vector<Util::Vector> polygon){
 	// Returns the edge of the polygon which is closest to the origin.
 
 	Edge closest;
-	closest.distance = std::numeric_limits<float>::max();;
+	closest.distance = std::numeric_limits<float>::max();
 
 	for (unsigned int i = 0; i < polygon.size(); ++i){
 		unsigned int j = (i+1 == polygon.size()) ? 0 : i + 1;
@@ -289,27 +289,31 @@ Edge findClosestEdge(std::vector<Util::Vector> polygon){
 }
 
 
-void SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB){
+std::pair<float, Util::Vector> SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+{
 
 	Util::Vector normal;	
+	Edge closestEdge; //it's asking for a ';' but this is legal???
 	float depth;
 	
 	float epsilon = 0.0001; // Should be a small number.
 	
-	while (true){
-		Edge closestEdge = findClosestEdge(_simplex);
+	while (true)
+	{
+		closestEdge = findClosestEdge(_simplex);
 		Util::Vector supportVector = support( _shapeA, _shapeB, closestEdge.normal);
 
 		float d = DotProduct(supportVector, closestEdge.normal);
 
-		if (d - closestEdge.distance < epsilon){
-			// What are we supposed to do with these values?
+		if (d - closestEdge.distance < epsilon)
+		{
 			normal = closestEdge.normal;
 			depth = d;
+			return std::make_pair(depth, normal);
 		}
 
 		else
-			_simplex.insert(_simplex.begin() + closestEdge.index, supportVector);
+			_simplex.insert(closestEdge.index, supportVector);
 	}
 
 }

@@ -131,10 +131,10 @@ namespace SteerLib
 
         private:
 			static bool GJK(std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
-			void EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
-			std::vector<Util::Vector> closestEdge(std::vector<Util::Vector> _simplex);
+			std::pair<float, Util::Vector> EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
+			//std::vector<Util::Vector> closestEdge(std::vector<Util::Vector> _simplex);
 			std::vector<Util::Vector> tripleProduct(Util::Vector firstVector, Util::Vector secondVector, Util::Vector thirdVector);
-			float dotProduct(std::vector<Util::Vector> vectorYo);
+			float DotProduct(Util::Vector u, Util::Vector v) {
 			std::vector<Util::Vector> normal(std::vector<Util::Vector> theVector);
 
     }; // class GJK_EPA
