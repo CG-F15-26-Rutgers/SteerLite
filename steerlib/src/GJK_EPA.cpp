@@ -4,8 +4,14 @@
 *
 */
 
-
+#include <limits>
 #include "obstacles/GJK_EPA.h"
+
+typedef struct Edge{
+	float distance;
+	Util::Vector normal;
+	unsignedint index;
+}Edge;
 
 
 SteerLib::GJK_EPA::GJK_EPA()
@@ -42,7 +48,7 @@ Util::Vector CreamyCenter(const std::vector<Util::Vector>& _shape)
 Util::Vector getFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vector direction)
 {
 	// it didn't like it when i did maxdot = 0
-	float maxdot = -1000000000000, dotproduct;
+	float maxdot = -1000, dotproduct;
 	Util::Vector farthest;
 
 	for (std::vector<Util::Vector>::const_iterator i = _shape.begin(); i != _shape.end(); ++i) {
@@ -237,118 +243,73 @@ bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vect
 	return false;
 }
 
-void SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
-{
-	while (true)
-	{
-		std::vector<Util::Vector> closestEdge = SteerLib::GJK_EPA::closestEdge(_simplex);
-	}
-
-	//more to come bbs
-
+Util::Vector CrossProduct(Util::Vector u, Util::Vector v){
+	// Returns cross product of the vectors u and v
+	
+	Util::Vector uv;
+	uv.x = u.y*v.z - u.z*v.y;
+	uv.y = u.z*v.x - u.x*v.z;
+	uv.z = u.x*v.y - u.y*v.x;
+	
+	return uv;
 }
 
-std::vector<Util::Vector> SteerLib::GJK_EPA::closestEdge(std::vector<Util::Vector> _simplex)
-{
-	float hugeDistance = 1000000000000;
-	float index = 0;
-	std::vector<Util::Vector> datEdge;
-	datEdge[0] = 100000000000; //red under the equals. Dont get it....
+float DotProduct(Util::Vector u, Util::Vector v){
+	//Returns the dot product of two vectors u and v.
+	
+	return u.x*v.x + u.y*v.y + u.z*v.z;
+}
 
-	for (int i = 0; _simplex.size() - 1; i++)
-	{
-		int d = i + 1 == _simplex.size() ? 0 : i + 1;
-		Util::Vector a = _simplex[i];
-		Util::Vector b = _simplex[d];
+Edge findClosestEdge(std::vector<Util::Vector> polygon){
+	// Returns the edge of the polygon which is closest to the origin.
 
-		Util::Vector edge;
-		for (int s = 0; s < a.length; s++)
-		{
-			edge[s] = a[s] - b[s];
+	Edge closest;
+	closest.distance = std::numeric_limits<float>::max();;
+
+	for (unsigned int i = 0; i < polygon.size(); ++i){
+		unsigned int j = (i+1 == polygon.size()) ? 0 : i + 1;
+
+		Util::Vector a = polygon[i];
+		Util::Vector b = polygon[j];
+		Util::Vector e = b - a;
+		Util::Vector oa = a; // Think of this as origin - a
+		Util::Vector n = CrossProduct(CrossProduct(e, oa), e);
+		n = Util::normalize(n);
+
+		float d = DotProduct(n, a);
+
+		if (d < closest.distance){
+			closest.distance = d;
+			closest.normal = n;
+			closest.index = j;
+		}
+	}
+
+	return closest;
+}
+
+
+void SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB){
+
+	Util::Vector normal;	
+	float depth;
+	
+	float epsilon = 0.0001; // Should be a small number.
+	
+	while (true){
+		Edge closestEdge = findClosestEdge(_simplex);
+		Util::Vector supportVector = support( _shapeA, _shapeB, closestEdge.normal);
+
+		float d = DotProduct(supportVector, closestEdge.normal);
+
+		if (d - closestEdge.distance < epsilon){
+			// What are we supposed to do with these values?
+			normal = closestEdge.normal;
+			depth = d;
 		}
 
-		std::vector<Util::Vector> product = tripleProduct(edge, a, edge);//actually triple product but im having trouble with this
-		std::vector<Util::Vector> normalV = normal(product);
-
-		float theDot = dotProduct(normalV);
-		if (theDot < datEdge[0]) //red under the compare
-		{
-			datEdge[0] = theDot; // red under equals
-		}
-
+		else
+			_simplex.insert(_simplex.begin() + closestEdge.index, supportVector);
 	}
 
-	return datEdge;
-}
-
-std::vector<Util::Vector> SteerLib::GJK_EPA::tripleProduct(Util::Vector firstVector, Util::Vector secondVector, Util::Vector thirdVector)
-{
-	std::vector<Util::Vector> product;
-
-	for (int i = 0; i < firstVector.length; i++)
-	{
-		//uhhhh wrong but im not sure what to do
-		product[i] = (firstVector[i] * secondVector[i]) + (firstVector[i] * secondVector[i]) + (firstVector[i] * secondVector[i]);
-	}
-
-	return product;
-}
-
-float SteerLib::GJK_EPA::dotProduct(std::vector<Util::Vector> vectorYo)
-{
-	float circleCircleDotDot = 0;
-	for (int i = 0; i < vectorYo.size() - 1; i++)
-	{
-		circleCircleDotDot += vectorYo[i]; //not finished
-	}
-}
-
-
-//Look at the GJK_EPA.h header file for documentation and instructions
-bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
-{
-	std::vector<Util::Vector> _simplex;
-	if (GJK(_simplex, _shapeA, _shapeB))
-		return true;
-
-	 /*
-	 * REHASH OF WHAT'S IN THE HEADER FILE 
-	 *
-	 * float& return_penetration_depth has to be updated for EPA
-	 * Vector& return_penetration_vector has to be updated for EPA
-	 * _shapeA and _shapeB
-	 * every point p(x,y,z) is vector p(x,y,z)
-	 * vector<point> gives list of points in polygon as vector<vector>
-
-	 * pseudocode 
-	 * GJK(Poly A, Poly B) {
-	 * 		if(A collides with B)
-	 * 				return (Simplex, true)
-	 * 		else
-	 * 				return (NULL, false)
-	 * }	
-	 *
-	 * EPA(Poly A, Poly B, Simplex S) {
-	 * 		penetration()
-	 * 		return(penetration_depth, penetration_vector)
-	 * 
-	 * }
-	 *
-	 * intersect(Poly A, Poly B) {
-	 *		(Simplex, isColliding) = GJK(A, B)
-	 * 		
-	 * 		if(is_colliding == true) {
-	 * 				(penetration_depth, penetration_vector) = EPA(A,B,Simplex)
-	 *				return(true, penetration_depth, penetration_vector)
-	 *		} else {
-	 * 				return(false, 0, NULL)
-	 * 		}
-	 *
-	 * 
-	 * }
-	 */
-
-
-
-    return false; // There is no collision
 }
