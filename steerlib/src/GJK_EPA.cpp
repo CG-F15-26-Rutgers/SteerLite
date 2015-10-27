@@ -111,9 +111,8 @@ bool SteerLib::GJK_EPA::SimplexOrigins(std::vector<Util::Vector>& _simplex, Util
 	return false;
 }
 
-bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
-	std::vector<Util::Vector> _simplex;
 
 	// Get random direction
 	Util::Vector d(1, 0, 0);
@@ -159,8 +158,7 @@ Edge SteerLib::GJK_EPA::findClosestEdge(std::vector<Util::Vector> polygon) {
 		Util::Vector a = polygon[i];
 		Util::Vector b = polygon[j];
 		Util::Vector e = b - a;
-		Util::Vector oa = a; // Think of this as a - origin
-		Util::Vector n = TripleProduct(e, oa, e);
+		Util::Vector n = TripleProduct(e, a, e);
 		n = Util::normalize(n);
 
 		float d = DotProduct(n, a);
@@ -208,11 +206,9 @@ void SteerLib::GJK_EPA::EPA(float& return_penetration_depth, Util::Vector& retur
 bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
 	std::vector<Util::Vector> _simplex;
-	float penDepth;
 	bool colliding;
-	Util::Vector penVector;
 
-	colliding = GJK(_shapeA, _shapeB);
+	colliding = GJK(_simplex, _shapeA, _shapeB);
 	if (colliding)
 	{
 		EPA(return_penetration_depth, return_penetration_vector, _simplex, _shapeA, _shapeB);
@@ -220,8 +216,8 @@ bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector&
 	}
 	else
 	{
-		penDepth = 0;
-		penVector.zero();
+		return_penetration_depth = 0;
+		return_penetration_vector.zero();
 		return false;
 	}
 }
