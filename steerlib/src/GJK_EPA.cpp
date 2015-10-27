@@ -7,22 +7,16 @@
 #include <limits>
 #include "obstacles/GJK_EPA.h"
 
-typedef struct Edge {
-	float distance;
-	Util::Vector normal;
-	unsigned int index;
-}Edge;
-
 SteerLib::GJK_EPA::GJK_EPA()
 {
 }
 
-float DotProduct(Util::Vector A, Util::Vector B)
+float SteerLib::GJK_EPA::DotProduct(Util::Vector A, Util::Vector B)
 {
 	return (A.x * B.x) + (A.y * B.y) + (A.z * B.z);
 }
 
-Util::Vector TripleProduct(Util::Vector A, Util::Vector B, Util::Vector C) {
+Util::Vector SteerLib::GJK_EPA::TripleProduct(Util::Vector A, Util::Vector B, Util::Vector C) {
 	// Formula: (A  x  B) x C =   B(C  dot  A) -  A(C  dot  B)
 	// Example: (AB x A0) x AB = A0(AB dot AB) - AB(AB dot A0)
 
@@ -32,10 +26,10 @@ Util::Vector TripleProduct(Util::Vector A, Util::Vector B, Util::Vector C) {
 	return B*CdotA - A*CdotB;
 }
 
-Util::Vector GetFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vector d)
+Util::Vector SteerLib::GJK_EPA::GetFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vector d)
 {
 	// Didn't produce the right resul if maxdot = 0;
-	float maxdot = -100000000000;
+	float maxdot = std::numeric_limits<float>::min();
 	float dotproduct;
 	Util::Vector farthest;
 
@@ -51,12 +45,12 @@ Util::Vector GetFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vec
 	return farthest;
 }
 
-Util::Vector Support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, Util::Vector d)
+Util::Vector SteerLib::GJK_EPA::Support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, Util::Vector d)
 {
 	return GetFarthestPoint(_shapeA, d) - GetFarthestPoint(_shapeB, -d);
 }
 
-bool SimplexOrigins(std::vector<Util::Vector>& _simplex, Util::Vector& d)
+bool SteerLib::GJK_EPA::SimplexOrigins(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 {
 	// Set A to last thing added to Simplex
 	Util::Vector A = _simplex[_simplex.size() - 1];
@@ -117,7 +111,7 @@ bool SimplexOrigins(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 	return false;
 }
 
-bool GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
 	std::vector<Util::Vector> _simplex;
 
@@ -153,7 +147,7 @@ bool GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vecto
 	return false;
 }
 
-Edge findClosestEdge(std::vector<Util::Vector> polygon) {
+Edge SteerLib::GJK_EPA::findClosestEdge(std::vector<Util::Vector> polygon) {
 	// Returns the edge of the polygon which is closest to the origin.
 
 	Edge closest;
