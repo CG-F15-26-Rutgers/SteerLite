@@ -50,6 +50,7 @@ Util::Vector SteerLib::GJK_EPA::Support(const std::vector<Util::Vector>& _shapeA
 	return GetFarthestPoint(_shapeA, d) - GetFarthestPoint(_shapeB, -d);
 }
 
+// Checks if origin is contained in Simplex
 bool SteerLib::GJK_EPA::SimplexOrigins(std::vector<Util::Vector>& _simplex, Util::Vector& d)
 {
 	// Set A to last thing added to Simplex
@@ -57,9 +58,9 @@ bool SteerLib::GJK_EPA::SimplexOrigins(std::vector<Util::Vector>& _simplex, Util
 	Util::Vector A0 = -A;
 
 	if (_simplex.size() == 3) {
-		// Triangle
+		// IT'S A TRIANGLE!!!!!
 		
-		// Get points B and C
+		// Get points B and C from Simplex
 		Util::Vector B = _simplex.at(0);
 		Util::Vector C = _simplex.at(1);
 
@@ -93,7 +94,7 @@ bool SteerLib::GJK_EPA::SimplexOrigins(std::vector<Util::Vector>& _simplex, Util
 		}
 	}
 	else {
-		// Line 
+		// IT'S A LINE!!!!!!
 
 		// Get point B
 		Util::Vector B = _simplex.at(0);
@@ -113,11 +114,11 @@ bool SteerLib::GJK_EPA::SimplexOrigins(std::vector<Util::Vector>& _simplex, Util
 
 bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
-
-	// Get random direction
+	// Get random starting direction
 	Util::Vector d(1, 0, 0);
 
 	// Get first point for minkowski difference
+	// Then add it to the Simplex
 	Util::Vector A = Support(_shapeA, _shapeB, d);
 	_simplex.push_back(A);
 
@@ -126,6 +127,7 @@ bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& _simplex, const std::vect
 
 	while (true) {
 		// Get next point for simplex
+		// Then add it to the Simplex
 		Util::Vector B = Support(_shapeA, _shapeB, d);
 		_simplex.push_back(B);
 
