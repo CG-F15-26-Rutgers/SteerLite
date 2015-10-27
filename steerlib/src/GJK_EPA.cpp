@@ -17,30 +17,9 @@ SteerLib::GJK_EPA::GJK_EPA()
 {
 }
 
-Util::Vector CrossProduct(Util::Vector u, Util::Vector v) {
-	// Returns the cross product of two vectors u and v.
-
-	Util::Vector uv;
-	uv.x = u.y*v.z - u.z*v.y;
-	uv.y = u.z*v.x - u.x*v.z;
-	uv.z = u.x*v.y - u.y*v.x;
-
-	return uv;
-}
-
 float DotProduct(Util::Vector A, Util::Vector B)
 {
 	return (A.x * B.x) + (A.y * B.y) + (A.z * B.z);
-}
-
-Util::Vector DoubleCrosser(Util::Vector u, Util::Vector v)
-{
-	// Returns (u x v) x u, which is equivalent to v(u dot u) - u(u dot v)
-
-	float uSquared = DotProduct(u, u);
-	float uDotv = DotProduct(u, v);
-
-	return v*uSquared - u*uDotv;
 }
 
 Util::Vector TripleProduct(Util::Vector A, Util::Vector B, Util::Vector C) {
@@ -50,17 +29,7 @@ Util::Vector TripleProduct(Util::Vector A, Util::Vector B, Util::Vector C) {
 	float CdotA = DotProduct(C, A);
 	float CdotB = DotProduct(C, B);
 
-	Util::Vector lhs;
-	lhs.x = (B.x * CdotA);
-	lhs.y = (B.y * CdotA);
-	lhs.z = (B.z * CdotA);
-
-	Util::Vector rhs;
-	rhs.x = (A.x * CdotB);
-	rhs.y = (A.y * CdotB);
-	rhs.z = (A.z * CdotB);
-
-	return lhs - rhs;
+	return B*CdotA - A*CdotB;
 }
 
 Util::Vector GetFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vector d)
@@ -197,7 +166,7 @@ Edge findClosestEdge(std::vector<Util::Vector> polygon) {
 		Util::Vector b = polygon[j];
 		Util::Vector e = b - a;
 		Util::Vector oa = a; // Think of this as a - origin
-		Util::Vector n = CrossProduct(CrossProduct(e, oa), e);
+		Util::Vector n = TripleProduct(e, oa, e);
 		n = Util::normalize(n);
 
 		float d = DotProduct(n, a);
@@ -215,6 +184,7 @@ Edge findClosestEdge(std::vector<Util::Vector> polygon) {
 void SteerLib::GJK_EPA::EPA(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
 
+	std::vector<Util::Vector> simplex = _simplex; // Copy the original so we can expand it.
 	Util::Vector normal;
 	Edge closestEdge;
 
@@ -222,7 +192,7 @@ void SteerLib::GJK_EPA::EPA(float& return_penetration_depth, Util::Vector& retur
 
 	while (true)
 	{
-		closestEdge = findClosestEdge(_simplex);
+		closestEdge = findClosestEdge(simplex);
 		Util::Vector supportVector = Support(_shapeA, _shapeB, closestEdge.normal);
 
 		float d = DotProduct(supportVector, closestEdge.normal);
@@ -231,10 +201,11 @@ void SteerLib::GJK_EPA::EPA(float& return_penetration_depth, Util::Vector& retur
 		{
 			return_penetration_vector = closestEdge.normal;
 			return_penetration_depth = d;
+			return;
 		}
 
 		else
-			_simplex.assign(_simplex.begin() + closestEdge.index, supportVector);
+			simplex.insert(simplex.begin() + closestEdge.index, supportVector);
 	}
 
 }
