@@ -1,0 +1,3 @@
+exp((radius()+tmp_agent->radius()-(position()-tmp_agent->position()).length())/_SocialForcesParams.sf_agent_b)
+
+exp((radius() -(position()-min_stuff.second).length())/_SocialForcesParams.sf_wall_b)
