@@ -242,7 +242,7 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 	SteerLib::AgentInterface *neighborInterface;
 	SteerLib::ObjectInterface *objectInterface;
 	Util::Vector differenceNormal;
-	float exponentialFactor
+	float exponentialFactor;
 
 	while (neighbor != _neighbors.end()){
 		if ((*neighbor)->isAgent()){
