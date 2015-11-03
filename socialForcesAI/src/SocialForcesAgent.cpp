@@ -301,9 +301,46 @@ Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
 
 Util::Vector SocialForcesAgent::calcWallRepulsionForce(float dt)
 {
-    std::cerr<<"<<<calcWallRepulsionForce>>> Please Implement my body\n";
+	Util::Vector wallRepulsionForce = Util::Vector(0, 0, 0);
+	SteerLib::ObstacleInterface *thing;
 
-    return Util::Vector(0,0,0);
+	std::set<SteerLib::SpatialDatabaseItemPtr> _theOthers;
+
+	getSimulationEngine()->getSpatialDatabase()->getItemsInRange(_theOthers, 
+		_position.x - (this->radius + _SocialForcesParams.sf_query_radius),
+		_position.x + (this->radius + _SocialForcesParams.sf_query_radius),
+		_position.z - (this->radius + _SocialForcesParams.sf_query_radius),
+		_position.z + (this->radius + _SocialForcesParams.sf_query_radius),
+		dynamic_cast<SteerLib::SpatialDatabaseItemPtr>(this)
+		);
+
+
+	std::set<SteerLib::SpatialDatabaseItemPtr>::iterator other = _theOthers.begin();
+	while (other != _theOthers.end())
+	{
+		if (!(*other)->isAgent())
+		{
+			thing = dynamic_cast<SteerLib::ObstacleInterface *>(*other);
+		}
+		else {
+			continue;
+		}
+		other++;
+	}
+
+	if (thing->computePenetration(this->position(), this->radius()) > 0.000001)
+	{
+		Util::Vector toThaWindowww = calcWallNormal(thing);
+		std::pair<Util::Point, Util::Point> toThaWallll = calcWallPointsFromNormal(thing, toThaWindowww);
+		std::pair<float, Util::Point> sweatDripDown = minimum_distance(toThaWallll.first, toThaWallll.second, position());
+
+		wallRepulsionForce = toThaWindowww * (sweatDripDown.first + radius());
+		_SocialForcesParams.sf_body_force;
+
+		return wallRepulsionForce;
+	}
+
+    return wallRepulsionForce;
 }
 
 
