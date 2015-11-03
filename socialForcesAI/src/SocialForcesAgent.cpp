@@ -201,24 +201,24 @@ void SocialForcesAgent::calcNextStep(float dt)
 
 std::pair<float, Util::Point> minimum_distance(Util::Point l1, Util::Point l2, Util::Point p)
 {
-  // Return minimum distance between line segment vw and point p
-  float lSq = (l1 - l2).lengthSquared();  // i.e. |l2-l1|^2 -  avoid a sqrt
-  if (lSq == 0.0)
-	  return std::make_pair((p - l2).length(),l1 );   // l1 == l2 case
-  // Consider the line extending the segment, parameterized as l1 + t (l2 - l1).
-  // We find projection of point p onto the line.
-  // It falls where t = [(p-l1) . (l2-l1)] / |l2-l1|^2
-  const float t = dot(p - l1, l2 - l1) / lSq;
-  if (t < 0.0)
-  {
-	  return std::make_pair((p - l1).length(), l1);       // Beyond the 'l1' end of the segment
-  }
-  else if (t > 1.0)
-  {
-	  return std::make_pair((p - l2).length(), l2);  // Beyond the 'l2' end of the segment
-  }
-  const Util::Point projection = l1 + t * (l2 - l1);  // Projection falls on the segment
-  return std::make_pair((p - projection).length(), projection) ;
+	// Return minimum distance between line segment vw and point p
+	float lSq = (l1 - l2).lengthSquared();  // i.e. |l2-l1|^2 -  avoid a sqrt
+	if (lSq == 0.0)
+		return std::make_pair((p - l2).length(),l1 );   // l1 == l2 case
+	// Consider the line extending the segment, parameterized as l1 + t (l2 - l1).
+	// We find projection of point p onto the line.
+	// It falls where t = [(p-l1) . (l2-l1)] / |l2-l1|^2
+	const float t = dot(p - l1, l2 - l1) / lSq;
+	if (t < 0.0)
+	{
+			return std::make_pair((p - l1).length(), l1);       // Beyond the 'l1' end of the segment
+	}
+	else if (t > 1.0)
+	{
+			return std::make_pair((p - l2).length(), l2);  // Beyond the 'l2' end of the segment
+	}
+	const Util::Point projection = l1 + t * (l2 - l1);  // Projection falls on the segment
+	return std::make_pair((p - projection).length(), projection) ;
 }
 
 
@@ -250,13 +250,13 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 			differenceNormal = normalize(position() - neighborInterface.position());
 			
 			exponentialFactor = exp((radius() + neighborInterface->radius() - (position() - neighborInterface->position()).length())
-										 / _SocialForcesParams.sf_agent_b);
+									/ _SocialForcesParams.sf_agent_b);
 			
 			agentForce += differenceNormal * _SocialForcesParams.sf_agent_a * exponentialFactor * dt;
 		}
 
 		else{
-			*neighborInterface = dynamic_cast<SteerLib::ObjectInterface*>(*neighbor);
+			*objectInterface = dynamic_cast<SteerLib::ObjectInterface*>(*neighbor);
 			Util::Vector obstacleNormal = calcWallNormal(objectInterface);
 			std::pair<Util::Point, Util::Point> wallPoints = calcWallPointsFromNormal(objectInterface, obstacleNormal);
 			std::pair<float, Util::Point> minDistToPoint = minimum_distance(wallPoints.first, wallPoints.second, position);
@@ -277,9 +277,7 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 
 Vector SocialForcesAgent::calcGoalForce(Vector _goalDirection, float _dt)
 {
-    std::cerr<<"<<<calcGoalForce>>> Please Implement my body\n";
-
-    return Util::Vector(0,0,0);
+    return (_goalDirection * PREFERED_SPEED - velocity()) / _SocialForcesParams.sf_acceleration * _dt;
 }
 
 
