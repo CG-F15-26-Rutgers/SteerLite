@@ -319,19 +319,15 @@ Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
 			continue;
 		}
 
+		if ((id() != MK8->id()) && (MK8->computePenetration(this->position(), this->radius()) > 0.000001))
+		{
+			agentRepulsorIronManForce = agentRepulsorIronManForce + (MK8->computePenetration(this->position(), this->radius()) * _SocialForcesParams.sf_agent_body_force * dt)
+				* normalize(position() - MK8->position());
+
+		}
+
 		MK42++;
 	}
-
-	if ((id() != MK8->id()) && (MK8->computePenetration(this->position(), this->radius()) > 0.000001))
-	{
-		agentRepulsorIronManForce = agentRepulsorIronManForce + (MK8->computePenetration(this->position(), this->radius()) * _SocialForcesParams.sf_agent_body_force * dt)
-			* normalize(position() - MK8->position());
-
-		return agentRepulsorIronManForce;
-	}
-
-
-
 
     return agentRepulsorIronManForce;
 }
@@ -363,19 +359,20 @@ Util::Vector SocialForcesAgent::calcWallRepulsionForce(float dt)
 		else {
 			continue;
 		}
+
+
+		if (thing->computePenetration(this->position(), this->radius()) > 0.000001)
+		{
+			Util::Vector toThaWindowww = calcWallNormal(thing);
+			std::pair<Util::Point, Util::Point> toThaWallll = calcWallPointsFromNormal(thing, toThaWindowww);
+			std::pair<float, Util::Point> sweatDripDown = minimum_distance(toThaWallll.first, toThaWallll.second, position());
+
+			wallRepulsionForce = toThaWindowww * (sweatDripDown.first + radius());
+			_SocialForcesParams.sf_body_force;
+		}
+
+
 		other++;
-	}
-
-	if (thing->computePenetration(this->position(), this->radius()) > 0.000001)
-	{
-		Util::Vector toThaWindowww = calcWallNormal(thing);
-		std::pair<Util::Point, Util::Point> toThaWallll = calcWallPointsFromNormal(thing, toThaWindowww);
-		std::pair<float, Util::Point> sweatDripDown = minimum_distance(toThaWallll.first, toThaWallll.second, position());
-
-		wallRepulsionForce = toThaWindowww * (sweatDripDown.first + radius());
-		_SocialForcesParams.sf_body_force;
-
-		return wallRepulsionForce;
 	}
 
     return wallRepulsionForce;
