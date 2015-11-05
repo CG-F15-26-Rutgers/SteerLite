@@ -20,37 +20,7 @@
     </worldBounds>
   </header>
 
-  
-  
-  <suggestedCameraView>
-    <position> <x>80</x> <y>10</y> <z>0</z> </position>
-    <lookat> <x>0</x> <y>0</y> <z>-5</z> </lookat>
-    <up> <x>0</x> <y>1</y> <z>0</z> </up>
-    <fovy>45</fovy>
-    <targetTangent> <x>0</x> <y>0</y> <z>0</z> </targetTangent>
-    <targetTime>50</targetTime>
-  </suggestedCameraView>
-
-  <suggestedCameraView>
-    <position> <x>0</x> <y>30</y> <z>-100</z> </position>
-    <lookat> <x>0</x> <y>0</y> <z>-5</z> </lookat>
-    <up> <x>0</x> <y>1</y> <z>0</z> </up>
-    <fovy>100</fovy>
-    <targetTangent> <x>-2</x> <y>0</y> <z>0</z> </targetTangent>
-    <targetTime>100</targetTime>
-  </suggestedCameraView>
-
-  <suggestedCameraView>
-    <position> <x>-50</x> <y>10</y> <z>0</z> </position>
-    <lookat> <x>0</x> <y>0</y> <z>-5</z> </lookat>
-    <up> <x>0</x> <y>1</y> <z>0</z> </up>
-    <fovy>45</fovy>
-    <targetTangent> <x>0</x> <y>0</y> <z>0</z> </targetTangent>
-    <targetTime>150</targetTime>
-  </suggestedCameraView>
-  
-  
-  
+ 
   <polygonObstacle isClosed="true">
 	<vertex> <x>-2.0</x> <y>0.0</y> <z>-1.0</z> </vertex>
 	<vertex> <x>-1.0</x> <y>0.0</y> <z>1.0</z> </vertex>

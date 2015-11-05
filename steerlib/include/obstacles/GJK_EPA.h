@@ -14,12 +14,6 @@
 
 #include <vector>
 
-typedef struct Edge {
-	float distance;
-	Util::Vector normal;
-	unsigned int index;
-}Edge;
-
 
 namespace SteerLib
 {
@@ -29,8 +23,7 @@ namespace SteerLib
         public:
 			GJK_EPA();
 
-
-			/*
+            /*
              *
              *  DO NOT CHANGE THE FUNCTION DEFINITION FOR intersect()
              *  -----------------------------------------------------
@@ -136,14 +129,6 @@ namespace SteerLib
             static bool intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
 
         private:
-			static float DotProduct(Util::Vector u, Util::Vector v);
-			static Util::Vector TripleProduct(Util::Vector A, Util::Vector B, Util::Vector C);
-			static Util::Vector GetFarthestPoint(const std::vector<Util::Vector>& _shape, Util::Vector d);
-			static Util::Vector Support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, Util::Vector d);
-			static bool SimplexOrigins(std::vector<Util::Vector>& _simplex, Util::Vector& d);
-			static bool GJK(std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
-			static Edge findClosestEdge(std::vector<Util::Vector> polygon);
-			static void EPA(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
 
     }; // class GJK_EPA
 
