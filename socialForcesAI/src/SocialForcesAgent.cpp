@@ -367,8 +367,7 @@ Util::Vector SocialForcesAgent::calcWallRepulsionForce(float dt)
 			std::pair<Util::Point, Util::Point> toThaWallll = calcWallPointsFromNormal(thing, toThaWindowww);
 			std::pair<float, Util::Point> sweatDripDown = minimum_distance(toThaWallll.first, toThaWallll.second, position());
 
-			wallRepulsionForce = toThaWindowww * (sweatDripDown.first + radius());
-			_SocialForcesParams.sf_body_force;
+			wallRepulsionForce += toThaWindowww * (sweatDripDown.first + radius()) * _SocialForcesParams.sf_body_force * dt;
 		}
 
 
