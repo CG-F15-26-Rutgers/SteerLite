@@ -312,7 +312,7 @@ Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
 	{
 		if ((*MK42)->isAgent())
 		{
-			*MK8 = dynamic_cast<SteerLib::AgentInterface *>(*MK8);
+			MK8 = dynamic_cast<SteerLib::AgentInterface *>(*MK8);
 		}
 		else
 		{
