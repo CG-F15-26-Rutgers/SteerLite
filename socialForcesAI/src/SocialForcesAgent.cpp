@@ -240,14 +240,14 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 	Util::Vector obstacleForce = Util::Vector(0,0,0);
 
 	SteerLib::AgentInterface *neighborInterface;
-	SteerLib::ObjectInterface *objectInterface;
+	SteerLib::ObstacleInterface *objectInterface;
 	Util::Vector differenceNormal;
 	float exponentialFactor;
 
 	while (neighbor != _neighbors.end()){
 		if ((*neighbor)->isAgent()){
-			*neighborInterface = dynamic_cast<SteerLib::AgentInterface*>(*neighbor);
-			differenceNormal = normalize(position() - neighborInterface.position());
+			*neighborInterface = dynamic_cast<SteerLib::AgentInterface *>(*neighbor);
+			differenceNormal = normalize(position() - neighborInterface->position());
 			
 			exponentialFactor = exp((radius() + neighborInterface->radius() - (position() - neighborInterface->position()).length())
 									/ _SocialForcesParams.sf_agent_b);
@@ -256,16 +256,16 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 		}
 
 		else{
-			*objectInterface = dynamic_cast<SteerLib::ObjectInterface*>(*neighbor);
+			*objectInterface = dynamic_cast<SteerLib::ObstacleInterface*>(*neighbor);
 			Util::Vector obstacleNormal = calcWallNormal(objectInterface);
 			std::pair<Util::Point, Util::Point> wallPoints = calcWallPointsFromNormal(objectInterface, obstacleNormal);
 			std::pair<float, Util::Point> minDistToPoint = minimum_distance(wallPoints.first, wallPoints.second, position);
 
-			differenceNormal = normalize(position() - obstacleInterface.position());
+			differenceNormal = normalize(position() - minDistToPoint.second);
 
 			exponentialFactor = exp((radius() -(position()-minDistToPoint.second).length())/_SocialForcesParams.sf_wall_b);
 
-			obstacleForce += differenceNormal * _SocialForcesParams.sf_wall_ * exponentialFactor * dt;
+			obstacleForce += differenceNormal * _SocialForcesParams.sf_wall_b * exponentialFactor * dt;
 		}
 		
 		++neighbor;
@@ -305,8 +305,8 @@ Util::Vector SocialForcesAgent::calcWallRepulsionForce(float dt)
 	SteerLib::ObstacleInterface *thing;
 
 	std::set<SteerLib::SpatialDatabaseItemPtr> _theOthers;
-
-	getSimulationEngine()->getSpatialDatabase()->getItemsInRange(_theOthers, 
+	
+	gSpatialDatabase->getItemsInRange(_theOthers, 
 		_position.x - (this->radius + _SocialForcesParams.sf_query_radius),
 		_position.x + (this->radius + _SocialForcesParams.sf_query_radius),
 		_position.z - (this->radius + _SocialForcesParams.sf_query_radius),
