@@ -230,8 +230,8 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
     std::set<SteerLib::SpatialDatabaseItemPtr> _neighbors;
 
 	gSpatialDatabase->getItemsInRange(_neighbors,
-									  _position.x-(_SocialForcesParams.sf_query_radius), _position.x+(_SocialForcesParams.sf_query_radius),
-									  _position.z-(_SocialForcesParams.sf_query_radius), _position.z+(_SocialForcesParams.sf_query_radius),
+									  _position.x - _SocialForcesParams.sf_query_radius, _position.x + _SocialForcesParams.sf_query_radius,
+									  _position.z - _SocialForcesParams.sf_query_radius, _position.z + _SocialForcesParams.sf_query_radius,
 									  dynamic_cast<SteerLib::SpatialDatabaseItemPtr>(this));
 
 	// Iterate through neighbors.
@@ -298,13 +298,12 @@ Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
 
 	std::set<SteerLib::SpatialDatabaseItemPtr> _ManySuits;
 
-	gSpatialDatabase->getItemsInRange( _ManySuits,
-		_position.x - (this->_radius + _SocialForcesParams.sf_query_radius),
-		_position.x + (this->_radius + _SocialForcesParams.sf_query_radius),
-		_position.z - (this->_radius + _SocialForcesParams.sf_query_radius),
-		_position.z + (this->_radius + _SocialForcesParams.sf_query_radius),
-		(this)
-		);
+	gSpatialDatabase->getItemsInRange(_ManySuits,
+									  _position.x - this->_radius + _SocialForcesParams.sf_query_radius,
+									  _position.x + this->_radius + _SocialForcesParams.sf_query_radius,
+									  _position.z - this->_radius + _SocialForcesParams.sf_query_radius,
+									  _position.z + this->_radius + _SocialForcesParams.sf_query_radius,
+									  dynamic_cast<SteerLib::SpatialDatabaseItemPtr>(this));
 
 	SteerLib::AgentInterface *MK8;
 	std::set<SteerLib::SpatialDatabaseItemPtr>::iterator MK42 = _ManySuits.begin(); 
@@ -341,12 +340,11 @@ Util::Vector SocialForcesAgent::calcWallRepulsionForce(float dt)
 	std::set<SteerLib::SpatialDatabaseItemPtr> _theOthers;
 	
 	gSpatialDatabase->getItemsInRange(_theOthers, 
-		_position.x - (this->radius + _SocialForcesParams.sf_query_radius),
-		_position.x + (this->radius + _SocialForcesParams.sf_query_radius),
-		_position.z - (this->radius + _SocialForcesParams.sf_query_radius),
-		_position.z + (this->radius + _SocialForcesParams.sf_query_radius),
-		dynamic_cast<SteerLib::SpatialDatabaseItemPtr>(this)
-		);
+									  _position.x - this->_radius + _SocialForcesParams.sf_query_radius,
+									  _position.x + this->_radius + _SocialForcesParams.sf_query_radius,
+									  _position.z - this->_radius + _SocialForcesParams.sf_query_radius,
+									  _position.z + this->_radius + _SocialForcesParams.sf_query_radius,
+									  dynamic_cast<SteerLib::SpatialDatabaseItemPtr>(this));
 
 
 	std::set<SteerLib::SpatialDatabaseItemPtr>::iterator other = _theOthers.begin();
@@ -530,7 +528,7 @@ bool SocialForcesAgent::reachedCurrentWaypoint()
 	}
 	else
 	{
-		false;
+		return false;
 	}
 
 	// return (position() - _currentLocalTarget).lengthSquared() < (radius()*radius());
