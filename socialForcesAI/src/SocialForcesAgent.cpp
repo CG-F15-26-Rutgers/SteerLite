@@ -246,7 +246,7 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 
 	while (neighbor != _neighbors.end()){
 		if ((*neighbor)->isAgent()){
-			*neighborInterface = dynamic_cast<SteerLib::AgentInterface *>(*neighbor);
+			neighborInterface = dynamic_cast<SteerLib::AgentInterface *>(*neighbor);
 			differenceNormal = normalize(position() - neighborInterface->position());
 			
 			exponentialFactor = exp((radius() + neighborInterface->radius() - (position() - neighborInterface->position()).length())
@@ -256,10 +256,10 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 		}
 
 		else{
-			*objectInterface = dynamic_cast<SteerLib::ObstacleInterface*>(*neighbor);
+			objectInterface = dynamic_cast<SteerLib::ObstacleInterface*>(*neighbor);
 			Util::Vector obstacleNormal = calcWallNormal(objectInterface);
 			std::pair<Util::Point, Util::Point> wallPoints = calcWallPointsFromNormal(objectInterface, obstacleNormal);
-			std::pair<float, Util::Point> minDistToPoint = minimum_distance(wallPoints.first, wallPoints.second, position);
+			std::pair<float, Util::Point> minDistToPoint = minimum_distance(wallPoints.first, wallPoints.second, position());
 
 			differenceNormal = normalize(position() - minDistToPoint.second);
 
@@ -312,7 +312,7 @@ Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
 	{
 		if ((*MK42)->isAgent())
 		{
-			MK8 = dynamic_cast<SteerLib::AgentInterface *>(*MK8);
+			MK8 = dynamic_cast<SteerLib::AgentInterface *>(*MK42);
 		}
 		else
 		{
