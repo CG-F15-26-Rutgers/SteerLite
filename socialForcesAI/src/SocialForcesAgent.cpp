@@ -293,9 +293,47 @@ Util::Vector SocialForcesAgent::calcRepulsionForce(float dt)
 
 Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
 {
-    std::cerr<<"<<<calcAgentRepulsionForce>>> Please Implement my body\n";
+	Util::Vector agentRepulsorIronManForce = Util::Vector(0, 0, 0);
+	
 
-    return Util::Vector(0,0,0);
+	std::set<SteerLib::SpatialDatabaseItemPtr> _ManySuits;
+
+	gSpatialDatabase->getItemsInRange( _ManySuits,
+		_position.x - (this->_radius + _SocialForcesParams.sf_query_radius),
+		_position.x + (this->_radius + _SocialForcesParams.sf_query_radius),
+		_position.z - (this->_radius + _SocialForcesParams.sf_query_radius),
+		_position.z + (this->_radius + _SocialForcesParams.sf_query_radius),
+		(this)
+		);
+
+	SteerLib::AgentInterface *MK8;
+	std::set<SteerLib::SpatialDatabaseItemPtr>::iterator MK42 = _ManySuits.begin(); 
+	while (MK42 != _ManySuits.end()) 
+	{
+		if ((*MK42)->isAgent())
+		{
+			*MK8 = dynamic_cast<SteerLib::AgentInterface *>(*MK8);
+		}
+		else
+		{
+			continue;
+		}
+
+		MK42++;
+	}
+
+	if ((id() != MK8->id()) && (MK8->computePenetration(this->position(), this->radius()) > 0.000001))
+	{
+		agentRepulsorIronManForce = agentRepulsorIronManForce + (MK8->computePenetration(this->position(), this->radius()) * _SocialForcesParams.sf_agent_body_force * dt)
+			* normalize(position() - MK8->position());
+
+		return agentRepulsorIronManForce;
+	}
+
+
+
+
+    return agentRepulsorIronManForce;
 }
 
 
